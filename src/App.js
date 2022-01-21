@@ -1,6 +1,6 @@
 import './App.css';
 import { useEffect, useState } from 'react';
-import { List, Button } from "antd"
+import { List, Button, Modal } from "antd"
 import 'antd/dist/antd.css';
 
 
@@ -9,6 +9,8 @@ function App() {
   const [records, setRecords] = useState([])
   const [next, setNext] = useState(null)
   const [previous, setPrevious] = useState(null)
+  const [visible, setVisible] = useState(false)
+  const [details, setDetails] = useState()
 
   useEffect(() => {
     const fetchRecords = async () => {
@@ -21,7 +23,6 @@ function App() {
           setRecords(json.results)
           setNext(json.next)
           setPrevious(json.previous)
-          console.log(json)
         })
         .catch(err => console.log(err));
     }
@@ -40,7 +41,6 @@ function App() {
           setRecords(json.results)
           setNext(json.next)
           setPrevious(json.previous)
-          console.log(json)
         })
         .catch(err => console.log(err));
   }
@@ -55,9 +55,22 @@ function App() {
           setRecords(json.results)
           setNext(json.next)
           setPrevious(json.previous)
-          console.log(json)
         })
         .catch(err => console.log(err));
+  }
+
+  const showDetails = async (url) => {
+    setVisible(true)
+
+    await fetch(url, {
+      method: "GET",
+      headers: {"Content-Type": "application/json"}
+      })
+      .then(response => response.json()) 
+      .then(json => {
+        setDetails(json)
+      })
+      .catch(err => console.log(err));
   }
 
   return (
@@ -71,9 +84,7 @@ function App() {
             <List.Item.Meta
               title={
                 <div>
-                  <p>Name : {item.name} </p>
-                  <p>Height : {item.height} </p>
-                  <p> Mass: {item.mass}</p>
+                  <p style={{ cursor: "pointer"}} onClick={() => showDetails(item.url)}>Name : {item.name} </p>
                 </div>
               }
               description=""
@@ -87,6 +98,18 @@ function App() {
         <Button type="primary" onClick={() => goToNext(next)} disabled={next === null ? true : false}>Next</Button>
         
       </div>
+
+
+      <Modal title="Details" visible={visible} onOk={() => setVisible(false)} cancelButtonProps={{ hidden: true}}>
+        <p>Name: {details && details.name}</p>
+        <p>Date of birth: {details && details.birth_year}</p>
+        <p>Mass: {details && details.mass}</p>
+        <p>Gender: {details && details.gender}</p>
+        <p>Height: {details && details.height}</p>
+        <p>Eye Color: {details && details.eye_color}</p>
+        <p>Skin Color: {details && details.skin_color}</p>
+        <p>Hair Color: {details && details.hair_color}</p>
+      </Modal>
     </div>
   );
 }
