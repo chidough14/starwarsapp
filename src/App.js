@@ -1,8 +1,10 @@
 import './App.css';
 import { useEffect, useState } from 'react';
-import { List, Button, Modal, PageHeader, Input } from "antd"
+import { List, Button, Modal, PageHeader, Input, Spin } from "antd"
+import { LoadingOutlined } from '@ant-design/icons';
 import 'antd/dist/antd.css';
 const { Search } = Input;
+const antIcon = <LoadingOutlined style={{ fontSize: 36}} spin />;
 
 
 function App() {
@@ -14,14 +16,18 @@ function App() {
   const [details, setDetails] = useState()
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(false)
+  const [spinner, setSpinner] = useState(false)
 
   const setPaginationAndRecords = (json) => {
     setRecords(json.results)
     setNext(json.next)
     setPrevious(json.previous)
+    setSpinner(false)
   }
  
   const fetchRecords = async (url, type) => {
+    setSpinner(true)
+
     await fetch(url, {
       method: "GET",
       headers: {"Content-Type": "application/json"}
@@ -30,6 +36,7 @@ function App() {
       .then(json => {
         if (type === 1) {
           setPaginationAndRecords(json)
+
         }
 
         if (type === 2 || type === 3) {
@@ -42,6 +49,7 @@ function App() {
 
         if (type === 4) {
           setDetails(json)
+          setSpinner(false)
         }
 
         if (type === 5) {
@@ -107,23 +115,28 @@ function App() {
         />
       </div>
 
-      <List
-        itemLayout="horizontal"
-        dataSource={records}
-        renderItem={(item) => (
-          <List.Item
-          >
-            <List.Item.Meta
-              title={
-                <div>
-                  <p style={{ cursor: "pointer"}} onClick={() => showDetails(item.url)}>Name : {item.name} </p>
-                </div>
-              }
-              description=""
-            />
-          </List.Item>
-        )}
-      />
+      {
+        spinner ? <div><Spin style={{marginLeft: "450px", marginTop: "30px", marginBottom: "30px"}} indicator={antIcon} /></div> :
+
+        <List
+          itemLayout="horizontal"
+          dataSource={records}
+          renderItem={(item) => (
+            <List.Item
+            >
+              <List.Item.Meta
+                title={
+                  <div>
+                    <p style={{ cursor: "pointer"}} onClick={() => showDetails(item.url)}>Name : {item.name} </p>
+                  </div>
+                }
+                description=""
+              />
+            </List.Item>
+          )}
+        />
+      }
+      
 
       <div style={{ display: "flex", justifyContent: "space-evenly"}}>
         <Button type='danger' onClick={() => goToPrevious(previous)} disabled={previous === null ? true : false}>Previous</Button>
@@ -136,14 +149,19 @@ function App() {
 
 
       <Modal title="Details" visible={visible} onOk={() => setVisible(false)} cancelButtonProps={{ hidden: true}}>
-        <p>Name: {details && details.name}</p>
-        <p>Date of birth: {details && details.birth_year}</p>
-        <p>Mass: {details && details.mass}</p>
-        <p>Gender: {details && details.gender}</p>
-        <p>Height: {details && details.height}</p>
-        <p>Eye Color: {details && details.eye_color}</p>
-        <p>Skin Color: {details && details.skin_color}</p>
-        <p>Hair Color: {details && details.hair_color}</p>
+        {
+          spinner ? <Spin style={{marginLeft: "200px", marginTop: "80px"}} indicator={antIcon} /> :
+          <div>
+            <p>Name: {details && details.name}</p>
+            <p>Date of birth: {details && details.birth_year}</p>
+            <p>Mass: {details && details.mass}</p>
+            <p>Gender: {details && details.gender}</p>
+            <p>Height: {details && details.height}</p>
+            <p>Eye Color: {details && details.eye_color}</p>
+            <p>Skin Color: {details && details.skin_color}</p>
+            <p>Hair Color: {details && details.hair_color}</p>
+          </div>
+        }
       </Modal>
     </div>
   );
