@@ -14,93 +14,80 @@ function App() {
   const [details, setDetails] = useState()
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(false)
+
+  const setPaginationAndRecords = (json) => {
+    setRecords(json.results)
+    setNext(json.next)
+    setPrevious(json.previous)
+  }
  
+  const fetchRecords = async (url, type) => {
+    await fetch(url, {
+      method: "GET",
+      headers: {"Content-Type": "application/json"}
+      })
+      .then(response => response.json()) 
+      .then(json => {
+        if (type === 1) {
+          setPaginationAndRecords(json)
+        }
+
+        if (type === 2 || type === 3) {
+          setPaginationAndRecords(json)
+
+          let newPage
+          newPage = type === 2 ? page + 1 : page - 1
+          setPage(newPage)
+        }
+
+        if (type === 4) {
+          setDetails(json)
+        }
+
+        if (type === 5) {
+          setPaginationAndRecords(json)
+          setPage(1)
+
+          setLoading(false)
+        }
+
+      })
+      .catch(err => console.log(err));
+  }
 
   useEffect(() => {
-    const fetchRecords = async () => {
-      await fetch('https://swapi.dev/api/people/', {
-        method: "GET",
-        headers: {"Content-Type": "application/json"}
-        })
-        .then(response => response.json()) 
-        .then(json => {
-          setRecords(json.results)
-          setNext(json.next)
-          setPrevious(json.previous)
-        })
-        .catch(err => console.log(err));
-    }
 
-    fetchRecords()
+    fetchRecords("https://swapi.dev/api/people/", 1)
+
   }, [])
 
 
   const goToNext = async (url) => {
-    await fetch(url, {
-        method: "GET",
-        headers: {"Content-Type": "application/json"}
-        })
-        .then(response => response.json()) 
-        .then(json => {
-          setRecords(json.results)
-          setNext(json.next)
-          setPrevious(json.previous)
 
-          let newPage = page + 1
-          setPage(newPage)
-        })
-        .catch(err => console.log(err));
+    fetchRecords(url, 2)
+
   }
 
   const goToPrevious = async (url) => {
-    await fetch(url, {
-        method: "GET",
-        headers: {"Content-Type": "application/json"}
-        })
-        .then(response => response.json()) 
-        .then(json => {
-          setRecords(json.results)
-          setNext(json.next)
-          setPrevious(json.previous)
-          
-          let newPage = page - 1
-          setPage(newPage)
-        })
-        .catch(err => console.log(err));
+
+    fetchRecords(url, 3)
+
   }
 
   const showDetails = async (url) => {
-    setVisible(true)
 
-    await fetch(url, {
-      method: "GET",
-      headers: {"Content-Type": "application/json"}
-      })
-      .then(response => response.json()) 
-      .then(json => {
-        setDetails(json)
-      })
-      .catch(err => console.log(err));
+    setVisible(true)
+    fetchRecords(url, 4)
+
   }
 
 
   const searchApi = async (value) => {
+
+    let url = `https://swapi.dev/api/people/?search=${value}`
     setLoading(true)
+    fetchRecords(url, 5)
 
-    await fetch(`https://swapi.dev/api/people/?search=${value}`, {
-      method: "GET",
-      headers: {"Content-Type": "application/json"}
-      })
-      .then(response => response.json()) 
-      .then(json => {
-        setRecords(json.results)
-        setNext(json.next)
-        setPrevious(json.previous)
-        setPage(1)
-
-        setLoading(false)
-      })
-      .catch(err => console.log(err));
   }
 
   return (
