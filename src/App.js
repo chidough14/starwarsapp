@@ -17,6 +17,7 @@ function App() {
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(false)
   const [spinner, setSpinner] = useState(false)
+  const [modalSpinner, setModalSpinner] = useState(false)
 
   const setPaginationAndRecords = (json) => {
     setRecords(json.results)
@@ -26,7 +27,12 @@ function App() {
   }
  
   const fetchRecords = async (url, type) => {
-    setSpinner(true)
+    
+    if (type === 4) {
+      setModalSpinner(true)
+    } else {
+      setSpinner(true)
+    }
 
     await fetch(url, {
       method: "GET",
@@ -49,7 +55,7 @@ function App() {
 
         if (type === 4) {
           setDetails(json)
-          setSpinner(false)
+          setModalSpinner(false)
         }
 
         if (type === 5) {
@@ -83,7 +89,7 @@ function App() {
   }
 
   const showDetails = async (url) => {
-
+    
     setVisible(true)
     fetchRecords(url, 4)
 
@@ -116,7 +122,7 @@ function App() {
       </div>
 
       {
-        spinner ? <div><Spin style={{marginLeft: "450px", marginTop: "30px", marginBottom: "30px"}} indicator={antIcon} /></div> :
+        spinner ? <div className="spinner"><Spin style={{display: "block", marginTop: "30px", marginBottom: "30px"}} indicator={antIcon} /></div> :
 
         <List
           itemLayout="horizontal"
@@ -150,7 +156,7 @@ function App() {
 
       <Modal title="Details" visible={visible} onOk={() => setVisible(false)} cancelButtonProps={{ hidden: true}}>
         {
-          spinner ? <Spin style={{marginLeft: "200px", marginTop: "80px"}} indicator={antIcon} /> :
+          modalSpinner ? <Spin style={{display: "block", marginTop: "80px"}} indicator={antIcon} /> :
           <div>
             <p>Name: {details && details.name}</p>
             <p>Date of birth: {details && details.birth_year}</p>
