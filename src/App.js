@@ -18,6 +18,7 @@ function App() {
   const [loading, setLoading] = useState(false)
   const [spinner, setSpinner] = useState(false)
   const [modalSpinner, setModalSpinner] = useState(false)
+  const [itemNo, setItemNo] = useState(0)
 
   const setPaginationAndRecords = (json) => {
     setRecords(json.results)
@@ -42,6 +43,7 @@ function App() {
       .then(json => {
         if (type === 1) {
           setPaginationAndRecords(json)
+          setItemNo(0)
 
         }
 
@@ -51,6 +53,10 @@ function App() {
           let newPage
           newPage = type === 2 ? page + 1 : page - 1
           setPage(newPage)
+
+          let newItemNo
+          newItemNo = type === 2 ? itemNo + 10 : itemNo - 10
+          setItemNo(newItemNo)
         }
 
         if (type === 4) {
@@ -61,6 +67,7 @@ function App() {
         if (type === 5) {
           setPaginationAndRecords(json)
           setPage(1)
+          setItemNo(0)
 
           setLoading(false)
         }
@@ -89,7 +96,7 @@ function App() {
   }
 
   const showDetails = async (url) => {
-    
+
     setVisible(true)
     fetchRecords(url, 4)
 
@@ -127,13 +134,13 @@ function App() {
         <List
           itemLayout="horizontal"
           dataSource={records}
-          renderItem={(item) => (
+          renderItem={(item, index) => (
             <List.Item
             >
               <List.Item.Meta
                 title={
                   <div>
-                    <p style={{ cursor: "pointer"}} onClick={() => showDetails(item.url)}>Name : {item.name} </p>
+                    <p style={{ cursor: "pointer"}} onClick={() => showDetails(item.url)}>{index + 1 + itemNo} : {item.name} </p>
                   </div>
                 }
                 description=""
